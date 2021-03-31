@@ -7,10 +7,16 @@ package vue;
 
 import DAO.CompteDAO;
 import DAO.ConnexionBdd;
+import DAO.PompierDAO;
 import java.awt.Toolkit;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import modele.Compte;
+import modele.Pompier;
 
 /**
  *
@@ -39,8 +45,8 @@ public class Frame_Connexion extends javax.swing.JFrame {
     private void complementGUI(){
         setIconImage(Toolkit.getDefaultToolkit()
             .getImage(getClass()
-            .getResource("/images/logoEclipse.png")));
-        setTitle("APPLICATION IMAGIN");
+            .getResource("/img/Connexion/logo.png")));
+        setTitle("APPLICATION SDIS");
     }
     /**
      * Creates new form NewJFrame
@@ -55,32 +61,16 @@ public class Frame_Connexion extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jTextField1 = new javax.swing.JTextField();
-        jlbl_connexion = new javax.swing.JLabel();
-        jbtn_valider1 = new javax.swing.JButton();
         jpnl_fond2 = new javax.swing.JPanel();
         jlbl_logo = new javax.swing.JLabel();
+        jlbl_msgErreur = new javax.swing.JLabel();
         jpnl_fond1 = new javax.swing.JPanel();
         jtxt_login = new javax.swing.JTextField();
-        jtxt_login1 = new javax.swing.JTextField();
         jlbl_login = new javax.swing.JLabel();
         jlbl_mdp = new javax.swing.JLabel();
         jpsw_mdp = new javax.swing.JPasswordField();
         jlbl_connexion1 = new javax.swing.JLabel();
         jbtn_valider = new javax.swing.JButton();
-        jbtn_valider2 = new javax.swing.JButton();
-
-        jTextField1.setText("jTextField1");
-
-        jlbl_connexion.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
-        jlbl_connexion.setText("CONNEXION");
-
-        jbtn_valider1.setText("Valider");
-        jbtn_valider1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jbtn_valider1ActionPerformed(evt);
-            }
-        });
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -90,13 +80,13 @@ public class Frame_Connexion extends javax.swing.JFrame {
 
         jlbl_logo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/Connexion/logo.png"))); // NOI18N
         jpnl_fond2.add(jlbl_logo, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 90, 90, 110));
+        jpnl_fond2.add(jlbl_msgErreur, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 60, -1, -1));
 
         getContentPane().add(jpnl_fond2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 200, 300));
 
         jpnl_fond1.setBackground(new java.awt.Color(233, 178, 152));
         jpnl_fond1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        jpnl_fond1.add(jtxt_login, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 140, 150, -1));
-        jpnl_fond1.add(jtxt_login1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 110, 150, -1));
+        jpnl_fond1.add(jtxt_login, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 110, 150, -1));
 
         jlbl_login.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jlbl_login.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/Connexion/utilisateur.png"))); // NOI18N
@@ -125,15 +115,7 @@ public class Frame_Connexion extends javax.swing.JFrame {
                 jbtn_validerActionPerformed(evt);
             }
         });
-        jpnl_fond1.add(jbtn_valider, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 270, -1, -1));
-
-        jbtn_valider2.setText("Valider");
-        jbtn_valider2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jbtn_valider2ActionPerformed(evt);
-            }
-        });
-        jpnl_fond1.add(jbtn_valider2, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 240, 70, -1));
+        jpnl_fond1.add(jbtn_valider, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 240, 70, -1));
 
         getContentPane().add(jpnl_fond1, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 0, 200, 300));
 
@@ -145,16 +127,31 @@ public class Frame_Connexion extends javax.swing.JFrame {
     }//GEN-LAST:event_jpsw_mdpActionPerformed
 
     private void jbtn_validerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtn_validerActionPerformed
-        // TODO add your handling code here:
+
+        try {
+            // TODO add your handling code here:
+            Compte leCompte = controleConnexion();
+            
+            JFrame leMenu = new JFrame("erreur de connexion");
+            if(leCompte != null){
+                int responsable = leCompte.getResponsable();
+                if(responsable == 0){
+                    Pompier s = PompierDAO.getPompier(cnt, leCompte.getLogin(), leCompte.getMdp());
+                    leMenu = new Frame_Test(s);
+                }
+                leMenu.setVisible(true);
+                dispose();
+            }
+            else
+            {
+                jlbl_msgErreur.setVisible(true);
+                JOptionPane.showMessageDialog(null, "erreur de login et mot de passe");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Frame_Connexion.class.getName()).log(Level.SEVERE, null, ex);
+        }
+      
     }//GEN-LAST:event_jbtn_validerActionPerformed
-
-    private void jbtn_valider1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtn_valider1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jbtn_valider1ActionPerformed
-
-    private void jbtn_valider2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtn_valider2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jbtn_valider2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -193,19 +190,15 @@ public class Frame_Connexion extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JButton jbtn_valider;
-    private javax.swing.JButton jbtn_valider1;
-    private javax.swing.JButton jbtn_valider2;
-    private javax.swing.JLabel jlbl_connexion;
     private javax.swing.JLabel jlbl_connexion1;
     private javax.swing.JLabel jlbl_login;
     private javax.swing.JLabel jlbl_logo;
     private javax.swing.JLabel jlbl_mdp;
+    private javax.swing.JLabel jlbl_msgErreur;
     private javax.swing.JPanel jpnl_fond1;
     private javax.swing.JPanel jpnl_fond2;
     private javax.swing.JPasswordField jpsw_mdp;
     private javax.swing.JTextField jtxt_login;
-    private javax.swing.JTextField jtxt_login1;
     // End of variables declaration//GEN-END:variables
 }

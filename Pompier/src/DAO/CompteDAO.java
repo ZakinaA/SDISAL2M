@@ -26,7 +26,7 @@ static ResultSet rs=null;
 public static Compte getCompte(Connection connection, String login, String mdp) throws SQLException{
     try
     {
-    requete=connection.prepareStatement("SELECT * FROM POMPIER , COMPTE" + " WHERE pomp_matricule = comp_id" + " AND login= ? and mdp= ?");
+    requete=connection.prepareStatement("SELECT * FROM POMPIER , COMPTE" + " WHERE COM_POMPIER = POMP_MATRICULE" + " AND login= ? and mdp= ?");
     requete.setString(1, login);
     requete.setString(2, mdp);
      

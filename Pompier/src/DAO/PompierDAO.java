@@ -24,7 +24,7 @@ public class PompierDAO {
        public static Pompier getPompier(Connection connection, String login, String mdp){
             Pompier unPompier = new Pompier();
             try{
-            requete=connection.prepareStatement("SELECT * FROM pompier, compte WHERE POMP_MATRICULE=POMP_MATRICULE AND LOGIN=? AND MDP=? ");
+            requete=connection.prepareStatement("SELECT * FROM pompier, compte WHERE COM_POMPIER = POMP_MATRICULE AND LOGIN=? AND MDP=? ");
             requete.setString(1, login);
             requete.setString(2, mdp);
             
